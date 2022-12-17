@@ -86,5 +86,5 @@ elif preferences == "Location":
         and match not in likes and match not in dislikes
     ]
 else:
-    suggested_matches = [
+    suggested_matches = []
        
