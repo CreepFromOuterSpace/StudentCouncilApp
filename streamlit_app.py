@@ -1,90 +1,99 @@
 import streamlit as st
+import pandas as pd
 
-# Data for potential matches
-data = [
-    {
-        "name": "Alice",
-        "age": 26,
-        "location": "New York",
-        "image": "alice.jpg"
-    },
-    {
-        "name": "Bob",
-        "age": 32,
-        "location": "Chicago",
-        "image": "bob.jpg"
-    },
-    # Add more potential matches here...
-]
 
-# User's likes and dislikes
-likes = []
-dislikes = []
+# Security
+#passlib,hashlib,bcrypt,scrypt
+import hashlib
+def make_hashes(password):
+	return hashlib.sha256(str.encode(password)).hexdigest()
 
-def start_dating():
-    # Display information for each potential match
-    for match in data:
-        name = match["name"]
-        age = match["age"]
-        location = match["location"]
-        image = match["image"]
+def check_hashes(password,hashed_text):
+	if make_hashes(password) == hashed_text:
+		return hashed_text
+	return False
+# DB Management
+import sqlite3 
+conn = sqlite3.connect('data.db')
+c = conn.cursor()
+# DB  Functions
+def create_usertable():
+	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT,password TEXT)')
 
-        st.text(f"Name: {name}")
-        st.text(f"Age: {age}")
-        st.text(f"Location: {location}")
-        st.image(image)
 
-        # Like or dislike button
-        if st.button("Like"):
-            likes.append(match)
-        elif st.button("Dislike"):
-            dislikes.append(match)
+def add_userdata(username,password):
+	c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
+	conn.commit()
 
-# Main app layout
-st.title("Speed Dating App")
+def login_user(username,password):
+	c.execute('SELECT * FROM userstable WHERE username =? AND password = ?',(username,password))
+	data = c.fetchall()
+	return data
 
-st.text("Welcome to our speed dating app! To get started, click the button below.")
-st.button("Start Dating").bind("Start Dating", start_dating)
 
-# Suggest matches based on likes and dislikes
-st.header("Suggested Matches")
+def view_all_users():
+	c.execute('SELECT * FROM userstable')
+	data = c.fetchall()
+	return data
 
-for match in data:
-    if match in likes and match not in dislikes:
-        st.text(f"Name: {match['name']}")
-        st.text(f"Age: {match['age']}")
-        st.text(f"Location: {match['location']}")
-        st.image(match["image"])
 
-# Sidebar for user input
-st.sidebar.header("Your Information")
 
-name = st.sidebar.text_input("Name")
-age = st.sidebar.number_input("Age")
-location = st.sidebar.text_input("Location")
+def main():
+	"""Simple Login App"""
 
-preferences = st.sidebar.radio("Preferences", ("None", "Age", "Location"))
+	st.title("Simple Login App")
 
-if preferences == "Age":
-    age_range = st.sidebar.slider("Age Range", min_value=18, max_value=99, value=(18, 99))
-else:
-    location_pref = st.sidebar.text_input("Location Preference")
+	menu = ["Home","Login","SignUp"]
+	choice = st.sidebar.selectbox("Menu",menu)
 
-st.sidebar.button("Update Preferences")
+	if choice == "Home":
+		st.subheader("Home")
 
-# Use preferences to filter and suggest matches
-if preferences == "Age":
-    suggested_matches = [
-        match for match in data
-        if match["age"] >= age_range[0] and match["age"] <= age_range[1]
-        and match not in likes and match not in dislikes
-    ]
-elif preferences == "Location":
-    suggested_matches = [
-        match for match in data
-        if location_pref in match["location"]
-        and match not in likes and match not in dislikes
-    ]
-else:
-    suggested_matches = []
-       
+	elif choice == "Login":
+		st.subheader("Login Section")
+
+		username = st.sidebar.text_input("User Name")
+		password = st.sidebar.text_input("Password",type='password')
+		if st.sidebar.checkbox("Login"):
+			# if password == '12345':
+			create_usertable()
+			hashed_pswd = make_hashes(password)
+
+			result = login_user(username,check_hashes(password,hashed_pswd))
+			if result:
+
+				st.success("Logged In as {}".format(username))
+
+				task = st.selectbox("Task",["Add Post","Analytics","Profiles"])
+				if task == "Add Post":
+					st.subheader("Add Your Post")
+
+				elif task == "Analytics":
+					st.subheader("Analytics")
+				elif task == "Profiles":
+					st.subheader("User Profiles")
+					user_result = view_all_users()
+					clean_db = pd.DataFrame(user_result,columns=["Username","Password"])
+					st.dataframe(clean_db)
+			else:
+				st.warning("Incorrect Username/Password")
+
+
+
+
+
+	elif choice == "SignUp":
+		st.subheader("Create New Account")
+		new_user = st.text_input("Username")
+		new_password = st.text_input("Password",type='password')
+
+		if st.button("Signup"):
+			create_usertable()
+			add_userdata(new_user,make_hashes(new_password))
+			st.success("You have successfully created a valid Account")
+			st.info("Go to Login Menu to login")
+
+
+
+if __name__ == '__main__':
+	main()
