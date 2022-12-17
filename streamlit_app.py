@@ -1,99 +1,72 @@
 import streamlit as st
-import pandas as pd
+import sqlite3
 
+# Connect to the database
+conn = sqlite3.connect("users.db")
+cursor = conn.cursor()
 
-# Security
-#passlib,hashlib,bcrypt,scrypt
-import hashlib
-def make_hashes(password):
-	return hashlib.sha256(str.encode(password)).hexdigest()
+# Create the "users" table if it doesn't already exist
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    password TEXT NOT NULL
+)
+""")
+conn.commit()
 
-def check_hashes(password,hashed_text):
-	if make_hashes(password) == hashed_text:
-		return hashed_text
-	return False
-# DB Management
-import sqlite3 
-conn = sqlite3.connect('data.db')
-c = conn.cursor()
-# DB  Functions
-def create_usertable():
-	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT,password TEXT)')
+def register(email, password):
+    cursor.execute("INSERT INTO users (email, password) VALUES (?, ?)", (email, password))
+    conn.commit()
 
+def login(email, password):
+    cursor.execute("SELECT * FROM users WHERE email=? AND password=?", (email, password))
+    user = cursor.fetchone()
+    return user is not None
 
-def add_userdata(username,password):
-	c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
-	conn.commit()
+# Main app layout
+st.title("Speed Dating App")
 
-def login_user(username,password):
-	c.execute('SELECT * FROM userstable WHERE username =? AND password = ?',(username,password))
-	data = c.fetchall()
-	return data
+# Sidebar for login and registration
+st.sidebar.header("Login")
 
+email = st.sidebar.text_input("Email")
+password = st.sidebar.password_input("Password")
 
-def view_all_users():
-	c.execute('SELECT * FROM userstable')
-	data = c.fetchall()
-	return data
+if st.sidebar.button("Login"):
+    if login(email, password):
+        # Redirect to main speed dating page
+        st.success("Login successful!")
+    else:
+        st.error("Invalid email or password")
 
+st.sidebar.header("Registration")
 
+email = st.sidebar.text_input("Email")
+password = st.sidebar.password_input("Password")
+confirm_password = st.sidebar.password_input("Confirm Password")
 
-def main():
-	"""Simple Login App"""
+if st.sidebar.button("Register"):
+    # Validate input
+    if not email:
+        st.error("Email is required")
+    elif not password:
+        st.error("Password is required")
+    elif password != confirm_password:
+        st.error("Passwords do not match")
+    else:
+        # Check if email is already in use
+        cursor.execute("SELECT * FROM users WHERE email=?", (email,))
+        user = cursor.fetchone()
+        if user:
+            st.error("Email is already in use")
+        else:
+            # Add user to the database
+            register(email, password)
+            st.success("Registration successful!")
 
-	st.title("Simple Login App")
-
-	menu = ["Home","Login","SignUp"]
-	choice = st.sidebar.selectbox("Menu",menu)
-
-	if choice == "Home":
-		st.subheader("Home")
-
-	elif choice == "Login":
-		st.subheader("Login Section")
-
-		username = st.sidebar.text_input("User Name")
-		password = st.sidebar.text_input("Password",type='password')
-		if st.sidebar.checkbox("Login"):
-			# if password == '12345':
-			create_usertable()
-			hashed_pswd = make_hashes(password)
-
-			result = login_user(username,check_hashes(password,hashed_pswd))
-			if result:
-
-				st.success("Logged In as {}".format(username))
-
-				task = st.selectbox("Task",["Add Post","Analytics","Profiles"])
-				if task == "Add Post":
-					st.subheader("Add Your Post")
-
-				elif task == "Analytics":
-					st.subheader("Analytics")
-				elif task == "Profiles":
-					st.subheader("User Profiles")
-					user_result = view_all_users()
-					clean_db = pd.DataFrame(user_result,columns=["Username","Password"])
-					st.dataframe(clean_db)
-			else:
-				st.warning("Incorrect Username/Password")
-
-
-
-
-
-	elif choice == "SignUp":
-		st.subheader("Create New Account")
-		new_user = st.text_input("Username")
-		new_password = st.text_input("Password",type='password')
-
-		if st.button("Signup"):
-			create_usertable()
-			add_userdata(new_user,make_hashes(new_password))
-			st.success("You have successfully created a valid Account")
-			st.info("Go to Login Menu to login")
-
-
-
-if __name__ == '__main__':
-	main()
+# Main speed dating page
+if login(email, password):
+    # Display speed dating content here...
+else:
+    st.warning("Please log in or register to use the app.")
