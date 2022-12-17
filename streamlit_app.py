@@ -1,6 +1,30 @@
 import streamlit as st
 import os
 import base64
+import sqlite3
+
+# Connect to the database
+conn = sqlite3.connect("users.db")
+cursor = conn.cursor()
+
+# Create the "users" table if it doesn't already exist
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    password TEXT NOT NULL
+)
+""")
+conn.commit()
+
+def register(email, password):
+    cursor.execute("INSERT INTO users (email, password) VALUES (?, ?)", (email, password))
+    conn.commit()
+
+def login(email, password):
+    cursor.execute("SELECT * FROM users WHERE email=? AND password=?", (email, password))
+    user = cursor.fetchone()
+    return user is not None
 
 # Data for potential matches
 data = [
@@ -45,38 +69,29 @@ def start_dating():
 # Main app layout
 st.title("Speed Dating App")
 
-st.text("Welcome to our speed dating app! To get started, click the button below.")
-st.button("Start Dating").bind("Start Dating", start_dating)
+# Sidebar for login and registration
+st.sidebar.header("Login")
 
-# Suggest matches based on likes and dislikes
-st.header("Suggested Matches")
+email = st.sidebar.text_input("Email")
+password = st.sidebar.password_input("Password")
 
-for match in data:
-    if match in likes and match not in dislikes:
-        st.text(f"Name: {match['name']}")
-        st.text(f"Age: {match['age']}")
-        st.text(f"Location: {match['location']}")
-        st.image(match["image"])
+if st.sidebar.button("Login"):
+    if login(email, password):
+        # Redirect to main speed dating page
+        st.success("Login successful!")
+    else:
+        st.error("Invalid email or password")
 
-# Sidebar for user input
-st.sidebar.header("Your Information")
+st.sidebar.header("Registration")
 
-name = st.sidebar.text_input("Name")
-age = st.sidebar.number_input("Age")
-location = st.sidebar.text_input("Location")
+email = st.sidebar.text_input("Email")
+password = st.sidebar.password_input("Password")
+confirm_password = st.sidebar.password_input("Confirm Password")
 
-# Image upload
-uploaded_file = st.sidebar.file_uploader("Upload your image", type=["jpg", "png"])
-if uploaded_file is not None:
-    with open(uploaded_file.name, "rb") as f:
-        image_bytes = f.read()
-    image_data = base64.b64encode(image_bytes).decode()
-    image_src = f'data:image/jpeg;base64,{image_data}'
-    st.sidebar.image(image_src, width=100)
-
-preferences = st.sidebar.radio("Preferences", ("None", "Age", "Location"))
-
-if preferences == "Age":
-    age_range = st.sidebar.slider("Age Range", min_value=18, max_value=99, value=(18, 99))
-else:
-    location_pref = st.sidebar.text_input("Location Preference")
+if st.sidebar.button("Register"):
+    # Validate input
+    if not email:
+        st.error("Email is required")
+    elif not password:
+        st.error("Password is required")
+    elif password != confirm_password:
