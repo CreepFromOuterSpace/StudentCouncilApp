@@ -1,72 +1,82 @@
 import streamlit as st
-import sqlite3
+import os
+import base64
 
-# Connect to the database
-conn = sqlite3.connect("users.db")
-cursor = conn.cursor()
+# Data for potential matches
+data = [
+    {
+        "name": "Alice",
+        "age": 26,
+        "location": "New York",
+        "image": "alice.jpg"
+    },
+    {
+        "name": "Bob",
+        "age": 32,
+        "location": "Chicago",
+        "image": "bob.jpg"
+    },
+    # Add more potential matches here...
+]
 
-# Create the "users" table if it doesn't already exist
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL,
-    password TEXT NOT NULL
-)
-""")
-conn.commit()
+# User's likes and dislikes
+likes = []
+dislikes = []
 
-def register(email, password):
-    cursor.execute("INSERT INTO users (email, password) VALUES (?, ?)", (email, password))
-    conn.commit()
+def start_dating():
+    # Display information for each potential match
+    for match in data:
+        name = match["name"]
+        age = match["age"]
+        location = match["location"]
+        image = match["image"]
 
-def login(email, password):
-    cursor.execute("SELECT * FROM users WHERE email=? AND password=?", (email, password))
-    user = cursor.fetchone()
-    return user is not None
+        st.text(f"Name: {name}")
+        st.text(f"Age: {age}")
+        st.text(f"Location: {location}")
+        st.image(image)
+
+        # Like or dislike button
+        if st.button("Like"):
+            likes.append(match)
+        elif st.button("Dislike"):
+            dislikes.append(match)
 
 # Main app layout
 st.title("Speed Dating App")
 
-# Sidebar for login and registration
-st.sidebar.header("Login")
+st.text("Welcome to our speed dating app! To get started, click the button below.")
+st.button("Start Dating").bind("Start Dating", start_dating)
 
-email = st.sidebar.text_input("Email")
-password = st.sidebar.password_input("Password")
+# Suggest matches based on likes and dislikes
+st.header("Suggested Matches")
 
-if st.sidebar.button("Login"):
-    if login(email, password):
-        # Redirect to main speed dating page
-        st.success("Login successful!")
-    else:
-        st.error("Invalid email or password")
+for match in data:
+    if match in likes and match not in dislikes:
+        st.text(f"Name: {match['name']}")
+        st.text(f"Age: {match['age']}")
+        st.text(f"Location: {match['location']}")
+        st.image(match["image"])
 
-st.sidebar.header("Registration")
+# Sidebar for user input
+st.sidebar.header("Your Information")
 
-email = st.sidebar.text_input("Email")
-password = st.sidebar.password_input("Password")
-confirm_password = st.sidebar.password_input("Confirm Password")
+name = st.sidebar.text_input("Name")
+age = st.sidebar.number_input("Age")
+location = st.sidebar.text_input("Location")
 
-if st.sidebar.button("Register"):
-    # Validate input
-    if not email:
-        st.error("Email is required")
-    elif not password:
-        st.error("Password is required")
-    elif password != confirm_password:
-        st.error("Passwords do not match")
-    else:
-        # Check if email is already in use
-        cursor.execute("SELECT * FROM users WHERE email=?", (email,))
-        user = cursor.fetchone()
-        if user:
-            st.error("Email is already in use")
-        else:
-            # Add user to the database
-            register(email, password)
-            st.success("Registration successful!")
+# Image upload
+uploaded_file = st.sidebar.file_uploader("Upload your image", type=["jpg", "png"])
+if uploaded_file is not None:
+    with open(uploaded_file.name, "rb") as f:
+        image_bytes = f.read()
+    image_data = base64.b64encode(image_bytes).decode()
+    image_src = f'data:image/jpeg;base64,{image_data}'
+    st.sidebar.image(image_src, width=100)
 
-# Main speed dating page
-if login(email, password):
-    pass
+preferences = st.sidebar.radio("Preferences", ("None", "Age", "Location"))
+
+if preferences == "Age":
+    age_range = st.sidebar.slider("Age Range", min_value=18, max_value=99, value=(18, 99))
 else:
-    st.warning("Please log in or register to use the app.")
+    location_pref = st.sidebar.text_input("Location Preference")
