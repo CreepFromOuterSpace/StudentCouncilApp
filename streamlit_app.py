@@ -67,6 +67,6 @@ if st.sidebar.button("Register"):
 
 # Main speed dating page
 if login(email, password):
-    # Display speed dating content here...
+    pass
 else:
     st.warning("Please log in or register to use the app.")
