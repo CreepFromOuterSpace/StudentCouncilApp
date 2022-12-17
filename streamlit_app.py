@@ -95,3 +95,4 @@ if st.sidebar.button("Register"):
     elif not password:
         st.error("Password is required")
     elif password != confirm_password:
+        pass
