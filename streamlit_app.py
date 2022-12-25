@@ -10,5 +10,5 @@ if st.button('Register'):
       for row in lines:
         word = password
         if row.find(word) != -1:
-            print('User already exists.')
+            st.warn('User already exists.')
             print('line Number:', lines.index(line))
