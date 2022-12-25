@@ -5,10 +5,9 @@ password = st.text_input('Password', type="password")
 
 if st.button('Register'):
   with st.spinner(text="Registering user..."):
-    with open(r'users.txt', 'r') as fp:
-      lines = fp.readlines()
-      for row in lines:
-        word = password
-        if row.find(word) != -1:
-            st.warn('User already exists.')
-            print('line Number:', lines.index(line))
+    with open(r'users.txt', 'r') as file:
+      content=file.read()
+      if username in content:
+        st.warn('There is already an account with your username...')
+      else:
+        st.success('Registered an account with username',username)
