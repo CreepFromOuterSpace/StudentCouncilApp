@@ -4,7 +4,7 @@ username = st.text_input('Email (Use Your ***********@bishopbrady.edu Email)')
 password = st.text_input('Password', type="password")
 
 if st.button('Register'):
-  with st.spinner(text="Registering user...")
+  with st.spinner(text="Registering user..."):
     with open(r'users.txt', 'r') as fp:
     lines = fp.readlines()
     for row in lines:
