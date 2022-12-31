@@ -17,6 +17,7 @@ with col1:
        user_list.insert(0, username)
        pass_list.insert(0, password)
        st.success('''Account Registered!''')
+       st.write(user_list)
 with col2:
   login_user = st.text_input('Email')
   login_pass = st.text_input('Password ', type="password")
