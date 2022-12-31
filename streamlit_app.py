@@ -11,7 +11,7 @@ if st.button('Register'):
   with st.spinner(text="Registering user..."):
     if (username in user_list):
       st.warning('''There's already an account with that email.''')
-    else
+    else:
       user_list.insert(1, username)
       pass_list.insert(1, password)
       st.success('''Account Registered!''')
