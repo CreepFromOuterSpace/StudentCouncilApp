@@ -3,11 +3,15 @@ import streamlit as st
 username = st.text_input('Email (Use Your ***********@bishopbrady.edu Email)')
 password = st.text_input('Password', type="password")
 
+user_list = [test@user.go]
+pass_list = [password]
+
+
 if st.button('Register'):
   with st.spinner(text="Registering user..."):
-    with open(r'users.txt', 'r') as file:
-      content=file.read()
-      if username in content:
-        st.warn('There is already an account with your username...')
-      else:
-        st.success('Registered an account with username',username)
+    if (username in user_list):
+      st.warning('''There's already an account with that email.''')
+    else
+      user_list.insert(1, username)
+      pass_list.insert(1, password)
+      st.success('''Account Registered!''')
