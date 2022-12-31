@@ -21,11 +21,11 @@ with col2:
   login_user = st.text_imput('Email')
   login_pass = st.text_input('Password', type="password")
   
-  if st.button('Login')
+  if st.button('Login'):
     with st.spinner(text="Logging in..."):
       if (login_user in user_list):
         index = user_list.index(login_user)
-        if pass_list[index] = login_pass
+        if pass_list[index] = login_pass:
           st.success('Logged in!')
       else:
         st.warning('''I couldn't find an account with that email. Please register first.''')
