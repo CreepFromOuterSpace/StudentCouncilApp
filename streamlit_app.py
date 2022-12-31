@@ -25,7 +25,7 @@ with col2:
     with st.spinner(text="Logging in..."):
       if (login_user in user_list):
         index = user_list.index(login_user)
-        if pass_list[index] = login_pass:
+        if pass_list[index] == login_pass:
           st.success('Logged in!')
       else:
         st.warning('''I couldn't find an account with that email. Please register first.''')
