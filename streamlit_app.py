@@ -3,8 +3,8 @@ import streamlit as st
 username = st.text_input('Email (Use Your ***********@bishopbrady.edu Email)')
 password = st.text_input('Password', type="password")
 
-user_list = [test@user.go]
-pass_list = [password]
+user_list = ["test@user.go"]
+pass_list = ["password"]
 
 
 if st.button('Register'):
