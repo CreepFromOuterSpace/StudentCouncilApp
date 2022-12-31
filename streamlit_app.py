@@ -1,17 +1,22 @@
 import streamlit as st
-
-username = st.text_input('Email (Use Your ***********@bishopbrady.edu Email)')
-password = st.text_input('Password', type="password")
-
 user_list = ["test@user.go"]
 pass_list = ["password"]
 
 
-if st.button('Register'):
-  with st.spinner(text="Registering user..."):
-    if (username in user_list):
-      st.warning('''There's already an account with that email.''')
-    else:
-      user_list.insert(1, username)
-      pass_list.insert(1, password)
-      st.success('''Account Registered!''')
+col1, col2 = st.columns(2)
+
+with col1
+  username = st.text_input('Email (Use Your ***********@bishopbrady.edu Email)')
+  password = st.text_input('Password', type="password")
+
+  if st.button('Register'):
+   with st.spinner(text="Registering user..."):
+     if (username in user_list):
+       st.warning('''There's already an account with that email.''')
+     else:
+       user_list.insert(0, username)
+       pass_list.insert(0, password)
+       st.success('''Account Registered!''')
+with col2
+  login_user = st.text_imput('Email')
+  login_pass = st.text_input('Password', type="password")
