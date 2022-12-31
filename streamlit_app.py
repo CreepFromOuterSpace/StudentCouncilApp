@@ -19,7 +19,7 @@ with col1:
        st.success('''Account Registered!''')
 with col2:
   login_user = st.text_input('Email')
-  login_pass = st.text_input('Password', type="password")
+  login_pass = st.text_input('Password ', type="password")
   
   if st.button('Login'):
     with st.spinner(text="Logging in..."):
