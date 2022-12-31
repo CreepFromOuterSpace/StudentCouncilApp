@@ -5,7 +5,7 @@ pass_list = ["password"]
 
 col1, col2 = st.columns(2)
 
-with col1
+with col1:
   username = st.text_input('Email (Use Your ***********@bishopbrady.edu Email)')
   password = st.text_input('Password', type="password")
 
@@ -17,6 +17,6 @@ with col1
        user_list.insert(0, username)
        pass_list.insert(0, password)
        st.success('''Account Registered!''')
-with col2
+with col2:
   login_user = st.text_imput('Email')
   login_pass = st.text_input('Password', type="password")
