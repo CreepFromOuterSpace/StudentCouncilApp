@@ -18,7 +18,10 @@ with col1:
        pass_list.insert(0, password)
        st.success('''Account Registered!''')
 with col2:
-  user = st.text_imput('Email')
+  username = st.text_input('Email (Use Your ***********@bishopbrady.edu Email)')
+  password = st.text_input('Password', type="password")
+
+  login_user = st.text_imput('Email')
   login_pass = st.text_input('Password', type="password")
   
   if st.button('Login'):
