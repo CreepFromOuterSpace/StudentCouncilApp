@@ -28,6 +28,6 @@ with col2:
         if pass_list[index] == login_pass:
           st.success('Logged in!')
         else:
-          st.warn('Incorrect password.')
+          st.warning('Incorrect password.')
       else:
         st.warning('''I couldn't find an account with that email. Please register first.''')
