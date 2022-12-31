@@ -27,5 +27,7 @@ with col2:
         index = user_list.index(login_user)
         if pass_list[index] == login_pass:
           st.success('Logged in!')
+        else:
+          st.warn('Incorrect password.')
       else:
         st.warning('''I couldn't find an account with that email. Please register first.''')
